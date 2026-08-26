@@ -1,24 +1,33 @@
 import { useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getAuthErrorMessage } from "../features/auth/authErrors";
 import { validateEmail, validatePassword } from "../utils/validators";
 
-interface LoginProps {
-  onSwitchToRegister: () => void;
+interface LocationState {
+  from?: { pathname: string };
 }
 
-export function Login({ onSwitchToRegister }: LoginProps) {
+export function Login() {
   const { signIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Hito 4 — Si ProtectedRoute mandó acá guardando la ruta original en
+  // `state.from`, volvemos ahí después de loguearse. Si no, a "/".
+  function redirectAfterAuth() {
+    navigate(state?.from?.pathname ?? "/", { replace: true });
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // Validar en el cliente antes de llamar a Firebase: feedback
-    // inmediato y sin gastar una request de red con datos ya inválidos.
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
     if (emailError || passwordError) {
@@ -30,9 +39,7 @@ export function Login({ onSwitchToRegister }: LoginProps) {
     setSubmitting(true);
     try {
       await signIn(email, password);
-      // No hace falta actualizar estado local de "usuario logueado" acá:
-      // el Authenticator escucha onAuthStateChanged y propaga el cambio
-      // solo, en cualquier parte de la app que use useAuth().
+      redirectAfterAuth();
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {
@@ -45,6 +52,7 @@ export function Login({ onSwitchToRegister }: LoginProps) {
     setSubmitting(true);
     try {
       await signInWithGoogle();
+      redirectAfterAuth();
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {
@@ -55,6 +63,9 @@ export function Login({ onSwitchToRegister }: LoginProps) {
   return (
     <section>
       <h1>Iniciar sesión</h1>
+      {state?.from && (
+        <p role="alert">Necesitás iniciar sesión para acceder a esa página.</p>
+      )}
       <form onSubmit={handleSubmit} noValidate>
         <label htmlFor="login-email">Email</label>
         <input
@@ -86,10 +97,7 @@ export function Login({ onSwitchToRegister }: LoginProps) {
       </button>
 
       <p>
-        ¿No tenés cuenta?{" "}
-        <button type="button" onClick={onSwitchToRegister}>
-          Registrate
-        </button>
+        ¿No tenés cuenta? <Link to="/register">Registrate</Link>
       </p>
     </section>
   );

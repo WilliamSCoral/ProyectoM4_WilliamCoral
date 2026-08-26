@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 3 — Autenticación**.
+> hitos del proyecto. Estado actual: **Hito 4 — Rutas protegidas**.
 
 ## Descripción del proyecto
 
@@ -62,6 +62,16 @@ prematuras, relevante para el Hito 4). Los errores de Firebase
 (`auth/wrong-password`, `auth/email-already-in-use`, etc.) se traducen a
 mensajes en español en `features/auth/authErrors.ts` en vez de mostrarse
 como código interno.
+
+**Hito 4 — Rutas protegidas:** `routes/ProtectedRoute.tsx` bloquea `/`
+(la vista de tareas) sin sesión activa y redirige a `/login`, guardando la
+ruta original en `location.state.from` para volver ahí después de
+loguearse (patrón enseñado en la lecture de React Router). El
+complemento `routes/PublicOnlyRoute.tsx` evita que un usuario ya logueado
+vea los formularios de Login/Register. Cualquier URL desconocida cae en
+el wildcard `*`, que redirige a `/` y de ahí pasa por la misma protección.
+Igual que en el Hito 3, mientras `loading` es `true` se muestra un estado
+neutral en vez de redirigir de forma prematura, evitando parpadeos.
 
 _(Esta sección se ampliará con las decisiones tomadas en cada hito.)_
 
@@ -133,7 +143,7 @@ comprenderlo.)_
 - [x] Hito 1 — Setup inicial
 - [x] Hito 2 — Configuración de Firebase
 - [x] Hito 3 — Autenticación
-- [ ] Hito 4 — Rutas protegidas
+- [x] Hito 4 — Rutas protegidas
 - [ ] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
 - [ ] Hito 6 — CRUD de tareas
 - [ ] Hito 7 — Email con AWS SES

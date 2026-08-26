@@ -1,14 +1,12 @@
 import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getAuthErrorMessage } from "../features/auth/authErrors";
 import { validateEmail, validatePassword } from "../utils/validators";
 
-interface RegisterProps {
-  onSwitchToLogin: () => void;
-}
-
-export function Register({ onSwitchToLogin }: RegisterProps) {
+export function Register() {
   const { signUp, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -33,6 +31,7 @@ export function Register({ onSwitchToLogin }: RegisterProps) {
     setSubmitting(true);
     try {
       await signUp(email, password);
+      navigate("/", { replace: true });
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {
@@ -45,6 +44,7 @@ export function Register({ onSwitchToLogin }: RegisterProps) {
     setSubmitting(true);
     try {
       await signInWithGoogle();
+      navigate("/", { replace: true });
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {
@@ -95,10 +95,7 @@ export function Register({ onSwitchToLogin }: RegisterProps) {
       </button>
 
       <p>
-        ¿Ya tenés cuenta?{" "}
-        <button type="button" onClick={onSwitchToLogin}>
-          Iniciá sesión
-        </button>
+        ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
       </p>
     </section>
   );
