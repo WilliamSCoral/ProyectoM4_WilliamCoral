@@ -1,0 +1,28 @@
+/* Estilos globales - enfoque mobile-first.
+   Se irán ampliando a medida que se agreguen componentes (Hitos 3, 4 y 6). */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f5f5f5;
+  color: #1a1a1a;
+  min-height: 100vh;
+}
+
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* A partir de 768px (tablets/desktop) se pueden ampliar los estilos */
+@media (min-width: 768px) {
+  main {
+    max-width: 720px;
+  }
+}

@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+
+# Build de Vite
+dist/
+dist-ssr/
+
+# Variables de entorno (NUNCA se suben al repositorio)
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# Vitest / coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript build info
+*.tsbuildinfo
