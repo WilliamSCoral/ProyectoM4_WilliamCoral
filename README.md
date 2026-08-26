@@ -73,6 +73,38 @@ el wildcard `*`, que redirige a `/` y de ahí pasa por la misma protección.
 Igual que en el Hito 3, mientras `loading` es `true` se muestra un estado
 neutral en vez de redirigir de forma prematura, evitando parpadeos.
 
+**Hito 5 — Modelo de datos y seguridad:** Firestore es NoSQL orientado a
+documentos, así que el diseño parte de la consulta que necesita la UI
+("dame todas las tareas de este usuario, ordenadas por fecha de
+creación") y no de relaciones entre tablas. Por eso `Task`
+([types/task.ts](src/types/task.ts)) incluye `userId` como campo propio
+de cada documento (no hay tabla de usuarios ni joins) y `createdAt` para
+poder ordenar. El `id` no se guarda dentro del documento: lo genera
+Firestore automáticamente y se recupera del snapshot al leer.
+
+La protección real de esos datos vive en
+[firestore.rules](firestore.rules), no en el código del frontend: las
+reglas deniegan todo por defecto y solo permiten leer/crear/editar/borrar
+una tarea si `request.auth.uid` coincide con el `userId` del documento
+(ownership), además de validar que el documento tenga la forma esperada
+(`hasValidShape`). Esto es necesario porque cualquier filtro que haga el
+cliente (`where("userId", "==", uid)`) es solo una optimización de
+consulta — sin reglas del lado del servidor, un usuario malicioso podría
+saltarse ese filtro y leer tareas ajenas directamente.
+
+Las reglas se publicaron en Firebase Console y se verificaron explícitamente
+con el Simulador de reglas (Rules Playground) — la guía del curso pide
+probar puntualmente si un usuario puede leer las tareas de otro:
+
+- `create` autenticado como `userA` con `userId: "userA"` → autorizado.
+- `create` autenticado como `userA` con `userId: "userB"` (a nombre de otro
+  usuario) → rechazado.
+- `get` autenticado como `userA` sobre una tarea con `userId: "userA"` →
+  autorizado.
+- `get` autenticado como `userB` sobre esa misma tarea de `userA` →
+  **rechazado**. Esta es la prueba explícita de que un usuario no puede
+  leer las tareas de otro.
+
 _(Esta sección se ampliará con las decisiones tomadas en cada hito.)_
 
 ## Instrucciones de instalación
@@ -144,7 +176,7 @@ comprenderlo.)_
 - [x] Hito 2 — Configuración de Firebase
 - [x] Hito 3 — Autenticación
 - [x] Hito 4 — Rutas protegidas
-- [ ] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
+- [x] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
 - [ ] Hito 6 — CRUD de tareas
 - [ ] Hito 7 — Email con AWS SES
 - [ ] Hito 8 — Testing

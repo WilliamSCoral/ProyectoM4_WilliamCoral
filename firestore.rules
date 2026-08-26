@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Hito 5 — Reglas de seguridad de Firestore: cada tarea le pertenece a un
+// único usuario (campo `userId`) y solo ese usuario puede leerla,
+// modificarla o borrarla. Se deniega todo por defecto (deny-by-default)
+// y se abre exclusivamente la colección `tasks` bajo reglas de
+// ownership. Esto es lo único que realmente protege los datos: sin
+// esto, cualquier usuario autenticado podría leer o escribir las tareas
+// de cualquier otro, sin importar qué filtros use el código del cliente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Deniega todo lo que no esté explícitamente permitido más abajo.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /tasks/{taskId} {
+      // ¿Hay un usuario autenticado en esta request?
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Para leer/actualizar/borrar un documento ya existente: el uid de
+      // quien hace la request debe coincidir con el userId guardado en
+      // el documento (`resource.data` = el estado actual en la base).
+      function isOwnerExisting() {
+        return isSignedIn() && request.auth.uid == resource.data.userId;
+      }
+
+      // Para crear un documento nuevo: el userId que se está intentando
+      // guardar (`request.resource.data` = lo que el cliente envía)
+      // debe coincidir con el uid autenticado. Esto evita que alguien
+      // cree una tarea a nombre de otro usuario.
+      function isOwnerIncoming() {
+        return isSignedIn() && request.auth.uid == request.resource.data.userId;
+      }
+
+      // Valida la forma mínima del documento para que Firestore rechace
+      // escrituras con campos faltantes o de tipo incorrecto, ya que al
+      // ser NoSQL no hay un esquema fijo que lo garantice por sí solo.
+      function hasValidShape() {
+        return request.resource.data.keys().hasAll(['title', 'description', 'completed', 'userId'])
+          && request.resource.data.title is string
+          && request.resource.data.description is string
+          && request.resource.data.completed is bool
+          && request.resource.data.userId is string;
+      }
+
+      allow get, list: if isOwnerExisting();
+      allow create: if isOwnerIncoming() && hasValidShape();
+      // En un update, el userId no puede cambiar (nadie puede
+      // "transferir" una tarea a otro usuario).
+      allow update: if isOwnerExisting()
+        && request.resource.data.userId == resource.data.userId
+        && hasValidShape();
+      allow delete: if isOwnerExisting();
+    }
+  }
+}
