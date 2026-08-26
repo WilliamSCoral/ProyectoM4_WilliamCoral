@@ -1,47 +1,52 @@
-import { useEffect, useState } from "react";
-import { auth, db } from "./services/firebase";
+import { useState } from "react";
+import { useAuth } from "./hooks/useAuth";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
 
-// Hito 2 — Checkpoint temporal de verificación.
-// Este componente SOLO sirve para confirmar que la app se conecta a
-// Firebase (Auth + Firestore) sin errores en la consola, usando las
-// variables de entorno correctamente. Se reemplaza por completo en el
-// Hito 3 al introducir el Router y el Authenticator real.
+// Hito 3 — Reemplaza el checkpoint temporal del Hito 2.
+// Todavía no existe React Router (eso es el Hito 4), así que la
+// navegación entre Login/Register es un simple toggle de estado local.
+// Una vez logueado, se muestra un placeholder: la vista real de tareas
+// llega en el Hito 6.
 function App() {
-  const [status, setStatus] = useState<"checking" | "ok" | "error">(
-    "checking",
-  );
+  const { user, loading, logout } = useAuth();
+  const [authView, setAuthView] = useState<"login" | "register">("login");
 
-  useEffect(() => {
-    try {
-      // Si `auth` y `db` se inicializaron sin lanzar, las credenciales del
-      // .env están bien leídas y Firebase App se inicializó correctamente.
-      if (auth.app && db.app) {
-        console.log("Firebase conectado. Proyecto:", auth.app.options.projectId);
-        setStatus("ok");
-      }
-    } catch (err) {
-      console.error("Error conectando con Firebase:", err);
-      setStatus("error");
-    }
-  }, []);
+  // Mientras `loading` es true, Firebase todavía está restaurando (o no)
+  // una sesión previa desde el storage local. Mostrar algo neutral acá
+  // evita un parpadeo de "no autenticado" seguido de "autenticado" al
+  // recargar la página.
+  if (loading) {
+    return (
+      <main>
+        <p>Cargando sesión...</p>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main>
+        {authView === "login" ? (
+          <Login onSwitchToRegister={() => setAuthView("register")} />
+        ) : (
+          <Register onSwitchToLogin={() => setAuthView("login")} />
+        )}
+      </main>
+    );
+  }
 
   return (
     <main>
       <h1>Gestor Estratégico de Tareas</h1>
-      <p>Hito 2 — Configuración de Firebase</p>
-      {status === "checking" && <p>Verificando conexión con Firebase...</p>}
-      {status === "ok" && (
-        <p style={{ color: "green" }}>
-          ✅ Conectado a Firebase (Auth + Firestore). Revisa la consola del
-          navegador para ver el projectId.
-        </p>
-      )}
-      {status === "error" && (
-        <p style={{ color: "red" }}>
-          ❌ Error al conectar. Revisa que tu archivo .env tenga las 4
-          variables VITE_FIREBASE_* completas y reinicia `npm run dev`.
-        </p>
-      )}
+      <p>Sesión iniciada como {user.email}.</p>
+      <p>
+        La gestión de tareas se implementa en el Hito 6. Por ahora, esta
+        vista solo confirma que la sesión persiste al recargar la página.
+      </p>
+      <button type="button" onClick={() => logout()}>
+        Cerrar sesión
+      </button>
     </main>
   );
 }

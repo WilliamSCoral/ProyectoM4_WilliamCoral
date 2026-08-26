@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 1 — Setup inicial**.
+> hitos del proyecto. Estado actual: **Hito 3 — Autenticación**.
 
 ## Descripción del proyecto
 
@@ -46,6 +46,22 @@ Los componentes describen *qué* se muestra; los hooks y servicios se
 encargan de *cómo* se obtienen y actualizan los datos. Cada carpeta
 contiene un `README.md` explicando su responsabilidad (se irán
 reemplazando por código a medida que avancen los hitos).
+
+**Hito 3 — Autenticación (Authenticator):** toda la lógica de sesión vive en
+un único Context (`features/auth/Authenticator.tsx`) que expone estado
+(`user`, `loading`) y acciones (`signUp`, `signIn`, `signInWithGoogle`,
+`logout`) a través del hook `hooks/useAuth.ts`. Ningún componente llama a
+Firebase Auth directamente: las páginas de Login/Register consumen
+`useAuth()`, y `services/authService.ts` es la única capa que importa
+`firebase/auth`. Esto centraliza el estado de sesión en una sola fuente
+de verdad y facilita mockear Firebase en los tests del Hito 8. La sesión
+persiste al recargar gracias a `onAuthStateChanged` (un observer de
+Firebase), y mientras se resuelve el estado inicial se muestra un loading
+en vez de asumir "no autenticado" (evita parpadeos/redirecciones
+prematuras, relevante para el Hito 4). Los errores de Firebase
+(`auth/wrong-password`, `auth/email-already-in-use`, etc.) se traducen a
+mensajes en español en `features/auth/authErrors.ts` en vez de mostrarse
+como código interno.
 
 _(Esta sección se ampliará con las decisiones tomadas en cada hito.)_
 
@@ -115,8 +131,8 @@ comprenderlo.)_
 ## Estado del proyecto (hitos)
 
 - [x] Hito 1 — Setup inicial
-- [ ] Hito 2 — Configuración de Firebase
-- [ ] Hito 3 — Autenticación
+- [x] Hito 2 — Configuración de Firebase
+- [x] Hito 3 — Autenticación
 - [ ] Hito 4 — Rutas protegidas
 - [ ] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
 - [ ] Hito 6 — CRUD de tareas
