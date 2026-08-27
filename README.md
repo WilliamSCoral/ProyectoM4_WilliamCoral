@@ -37,7 +37,7 @@ src/
 ├─ hooks/        # Custom hooks (useAuth, useTasks)
 ├─ types/        # Tipos e interfaces compartidas
 └─ utils/        # Funciones helper puras
-functions/       # Vercel Functions (envío de emails vía AWS SES)
+api/             # Vercel Functions (envío de emails vía AWS SES)
 tests/           # Tests unitarios y de componentes
 ```
 
@@ -229,8 +229,16 @@ manualmente, sin pasarle nunca esos valores a la IA.
   color de la prioridad más alta ese día. Al hacer clic en un día, filtra
   la lista de abajo a solo esas tareas.
 - **Home pública**: `/` ya no es directo el login — es una landing que
-  explica la app ([Home.tsx](src/pages/Home.tsx)), con el acceso arriba
-  a la derecha. Las tareas se movieron a `/tareas` (protegida).
+  explica la app ([Home.tsx](src/pages/Home.tsx)). Las tareas se
+  movieron a `/tareas` (protegida).
+- **Header fijo y layout de escritorio**: [AppHeader.tsx](src/components/AppHeader.tsx)
+  queda fijo arriba en toda la app (Home, Login, Register, Tareas), con
+  acceso a Inicio y a "Iniciar sesión"/"Mis tareas" + "Cerrar sesión"
+  según haya o no sesión — así se puede pasar de Tareas a Home sin
+  cerrar sesión. En escritorio (≥1024px) el contenido usa el 90% del
+  ancho y, en `/tareas`, se divide en dos paneles: uno a la izquierda
+  (1/3) con el formulario de crear tarea y el calendario, y otro a la
+  derecha (2/3) con los filtros y la lista.
 
 No implementado: drag & drop para reordenar tareas.
 
