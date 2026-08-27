@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getAuthErrorMessage } from "../features/auth/authErrors";
@@ -9,7 +9,7 @@ interface LocationState {
 }
 
 export function Login() {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, googleRedirectError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
@@ -18,6 +18,16 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // El login con Google navega fuera de la SPA y vuelve: si Google
+  // devolvió un error, esta página ya se recargó por completo y no
+  // puede haberlo atrapado con su propio try/catch, así que se muestra
+  // acá apenas `Authenticator` lo resuelve.
+  useEffect(() => {
+    if (googleRedirectError) {
+      setFormError(googleRedirectError);
+    }
+  }, [googleRedirectError]);
 
   // Hito 4 — Si ProtectedRoute mandó acá guardando la ruta original en
   // `state.from`, volvemos ahí después de loguearse. Si no, a "/tareas".
@@ -51,11 +61,14 @@ export function Login() {
     setFormError(null);
     setSubmitting(true);
     try {
+      // A partir de acá la pestaña navega a Google: no hay nada más
+      // para hacer en este componente. Cuando la persona vuelva,
+      // `PublicOnlyRoute` la manda a /tareas apenas `onAuthStateChanged`
+      // confirme la sesión (o `googleRedirectError`, más arriba, muestra
+      // el error si Google no la autenticó).
       await signInWithGoogle();
-      redirectAfterAuth();
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
-    } finally {
       setSubmitting(false);
     }
   }

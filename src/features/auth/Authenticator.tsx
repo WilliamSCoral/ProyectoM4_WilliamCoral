@@ -2,6 +2,7 @@ import { createContext, useEffect, useState, type ReactNode } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../services/firebase";
 import * as authService from "../../services/authService";
+import { getAuthErrorMessage } from "./authErrors";
 import type { AppUser, AuthContextValue } from "../../types/auth";
 
 // Hito 3 — "Authenticator": Context + Provider que centraliza TODO lo
@@ -27,6 +28,9 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 export function Authenticator({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [googleRedirectError, setGoogleRedirectError] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -39,9 +43,22 @@ export function Authenticator({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    // Recupera el resultado del login con Google una sola vez, al
+    // montar la app — es lo único que puede saber si esa página se
+    // acaba de recargar de vuelta después de un `signInWithRedirect`.
+    // Si Google devolvió un error (cuenta cancelada, popup bloqueado
+    // por el propio Google, etc.), acá es donde se puede mostrar en vez
+    // de perderse silenciosamente.
+    authService.getGoogleRedirectResult().catch((error: unknown) => {
+      setGoogleRedirectError(getAuthErrorMessage(error));
+    });
+  }, []);
+
   const value: AuthContextValue = {
     user,
     loading,
+    googleRedirectError,
     signUp: authService.registerWithEmail,
     signIn: authService.loginWithEmail,
     signInWithGoogle: authService.loginWithGoogle,

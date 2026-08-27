@@ -33,6 +33,7 @@ describe("Login", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       loading: false,
+      googleRedirectError: null,
       signUp: vi.fn(),
       signIn,
       signInWithGoogle,

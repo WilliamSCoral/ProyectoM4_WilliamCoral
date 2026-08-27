@@ -13,8 +13,17 @@ export type AppUser = User;
 export interface AuthContextValue {
   user: AppUser | null;
   loading: boolean;
+  // Si el último intento de login con Google (redirect de ida y vuelta a
+  // Google) terminó en error, el mensaje ya traducido queda acá — la
+  // página que inició el login se recargó por completo y no puede
+  // atraparlo con su propio try/catch.
+  googleRedirectError: string | null;
   signUp: (email: string, password: string) => Promise<UserCredential>;
   signIn: (email: string, password: string) => Promise<UserCredential>;
-  signInWithGoogle: () => Promise<UserCredential>;
+  // `signInWithRedirect` no devuelve las credenciales: solo navega a
+  // Google. El resultado real llega después, cuando la app se vuelve a
+  // montar y `Authenticator` lo resuelve (ver `googleRedirectError` y
+  // `onAuthStateChanged`).
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
