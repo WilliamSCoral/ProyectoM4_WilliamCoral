@@ -26,3 +26,10 @@ export function validateTaskTitle(title: string): string | null {
   if (!title.trim()) return "El título es obligatorio.";
   return null;
 }
+
+// Extra credit — La fecha de ejecución es obligatoria: sin ella la
+// tarea no tendría sentido en el calendario.
+export function validateDueDate(dueDate: string): string | null {
+  if (!dueDate) return "La fecha de ejecución es obligatoria.";
+  return null;
+}

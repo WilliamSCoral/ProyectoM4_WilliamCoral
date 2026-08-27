@@ -38,12 +38,16 @@ service cloud.firestore {
       // Valida la forma mínima del documento para que Firestore rechace
       // escrituras con campos faltantes o de tipo incorrecto, ya que al
       // ser NoSQL no hay un esquema fijo que lo garantice por sí solo.
+      // `priority`/`dueDate` se agregaron para el extra credit de
+      // prioridad + calendario (ambos obligatorios en el formulario).
       function hasValidShape() {
-        return request.resource.data.keys().hasAll(['title', 'description', 'completed', 'userId'])
+        return request.resource.data.keys().hasAll(['title', 'description', 'completed', 'userId', 'priority', 'dueDate'])
           && request.resource.data.title is string
           && request.resource.data.description is string
           && request.resource.data.completed is bool
-          && request.resource.data.userId is string;
+          && request.resource.data.userId is string
+          && request.resource.data.priority in ['normal', 'media', 'alta']
+          && request.resource.data.dueDate is timestamp;
       }
 
       allow get, list: if isOwnerExisting();

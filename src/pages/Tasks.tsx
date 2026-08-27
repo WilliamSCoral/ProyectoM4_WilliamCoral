@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useTasks } from "../hooks/useTasks";
 import {
@@ -7,8 +7,11 @@ import {
   toggleTaskCompleted,
   updateTask,
 } from "../services/taskService";
+import { isSameDay } from "../utils/date";
 import { TaskForm } from "../components/TaskForm";
 import { TaskList } from "../components/TaskList";
+import { TaskFilters, type PriorityFilter, type StatusFilter } from "../components/TaskFilters";
+import { TaskCalendar } from "../components/TaskCalendar";
 import { EmailSummaryButton } from "../components/EmailSummaryButton";
 import type { Task, TaskFormValues } from "../types/task";
 
@@ -18,6 +21,31 @@ export function Tasks() {
   const { user, logout } = useAuth();
   const { tasks, loading, error } = useTasks();
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todas");
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("todas");
+  const [search, setSearch] = useState("");
+  // Extra credit — Día elegido en el calendario. El calendario en sí
+  // siempre pinta TODAS las tareas (sin filtrar), pero elegir un día acá
+  // se combina con los demás filtros para la lista de abajo.
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      if (statusFilter === "pendientes" && task.completed) return false;
+      if (statusFilter === "completadas" && !task.completed) return false;
+      if (priorityFilter !== "todas" && (task.priority ?? "normal") !== priorityFilter) {
+        return false;
+      }
+      if (search.trim() && !task.title.toLowerCase().includes(search.trim().toLowerCase())) {
+        return false;
+      }
+      if (selectedDate && (!task.dueDate || !isSameDay(task.dueDate.toDate(), selectedDate))) {
+        return false;
+      }
+      return true;
+    });
+  }, [tasks, statusFilter, priorityFilter, search, selectedDate]);
 
   async function handleCreate(values: TaskFormValues) {
     if (!user) return;
@@ -62,6 +90,26 @@ export function Tasks() {
 
       <TaskForm submitLabel="Agregar tarea" onSubmit={handleCreate} />
 
+      <TaskCalendar tasks={tasks} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+
+      {selectedDate && (
+        <p className="task-filters__selected-date">
+          Mostrando tareas del {selectedDate.toLocaleDateString("es-AR")}.{" "}
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSelectedDate(null)}>
+            Quitar filtro de fecha
+          </button>
+        </p>
+      )}
+
+      <TaskFilters
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+        priority={priorityFilter}
+        onPriorityChange={setPriorityFilter}
+        search={search}
+        onSearchChange={setSearch}
+      />
+
       {actionError && (
         <p className="alert alert-error" role="alert">
           {actionError}
@@ -75,7 +123,7 @@ export function Tasks() {
       )}
       {!loading && !error && (
         <TaskList
-          tasks={tasks}
+          tasks={filteredTasks}
           onToggle={handleToggle}
           onSave={handleSave}
           onDelete={handleDelete}

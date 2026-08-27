@@ -255,8 +255,9 @@ Verificado en producción real (no solo en local):
 - CRUD de tareas contra Firestore (crear, editar, completar, eliminar),
   actualizándose sin recargar.
 - Envío de resumen por email a través de la Vercel Function
-  `/api/send-email` (probado el camino de rechazo de SES; el de éxito ya
-  se había probado en local con un email verificado).
+  `/api/send-email`, probado en producción tanto el envío exitoso (con
+  la cuenta de prueba verificada en SES) como el rechazo por email no
+  verificado.
 - Diseño responsive en mobile (375px) y sin errores inesperados en la
   consola del navegador.
 
@@ -376,3 +377,28 @@ manualmente, sin pasarle nunca esos valores a la IA.
 - [x] Hito 7 — Email con AWS SES
 - [x] Hito 8 — Testing
 - [x] Hito 9 — Deploy en Vercel
+
+## Extra credit implementado
+
+- **Filtros**: por estado (pendientes/completadas/todas), por prioridad y
+  por texto en el título ([TaskFilters.tsx](src/components/TaskFilters.tsx)).
+- **Prioridad y fechas**: cada tarea tiene una prioridad obligatoria
+  (Normal/Media/Alta, elegida con un `<input type="range">` de 3
+  posiciones coloreado verde/naranja/rojo) y una fecha de ejecución
+  obligatoria. Se muestran la fecha de creación y de vencimiento en cada
+  tarjeta de tarea.
+- **Calendario de vencimientos**: [TaskCalendar.tsx](src/components/TaskCalendar.tsx)
+  pinta por defecto los días con tareas pendientes, con un punto del
+  color de la prioridad más alta ese día. Al hacer clic en un día, filtra
+  la lista de abajo a solo esas tareas.
+- **Home pública**: `/` ya no es directo el login — es una landing que
+  explica la app ([Home.tsx](src/pages/Home.tsx)), con el acceso arriba
+  a la derecha. Las tareas se movieron a `/tareas` (protegida).
+
+No implementado: drag & drop para reordenar tareas.
+
+⚠️ Si se clona este repo en un proyecto de Firebase nuevo (o se quiere
+reflejar este cambio en uno ya existente), hay que volver a publicar
+[firestore.rules](firestore.rules) en la consola de Firebase: ahora
+`priority` y `dueDate` son campos obligatorios también en las reglas de
+seguridad, no solo en el formulario.

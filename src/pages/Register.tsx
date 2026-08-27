@@ -31,7 +31,7 @@ export function Register() {
     setSubmitting(true);
     try {
       await signUp(email, password);
-      navigate("/", { replace: true });
+      navigate("/tareas", { replace: true });
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {
@@ -44,7 +44,7 @@ export function Register() {
     setSubmitting(true);
     try {
       await signInWithGoogle();
-      navigate("/", { replace: true });
+      navigate("/tareas", { replace: true });
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
     } finally {

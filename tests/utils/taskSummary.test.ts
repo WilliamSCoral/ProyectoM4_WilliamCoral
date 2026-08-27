@@ -9,6 +9,8 @@ function makeTask(overrides: Partial<Task>): Task {
     title: "Tarea",
     description: "",
     completed: false,
+    priority: "normal",
+    dueDate: {} as Task["dueDate"],
     userId: "user-1",
     createdAt: {} as Task["createdAt"],
     ...overrides,

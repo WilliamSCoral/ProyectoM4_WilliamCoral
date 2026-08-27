@@ -12,6 +12,7 @@ import {
   type FirestoreError,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { dateInputValueToTimestamp } from "../utils/date";
 import type { Task, TaskFormValues } from "../types/task";
 
 // Hito 6 — Capa de servicio: encapsula todas las llamadas a Firestore
@@ -59,7 +60,14 @@ export function subscribeToUserTasks(
 
 export function createTask(userId: string, values: TaskFormValues) {
   return addDoc(tasksCollection, {
-    ...values,
+    title: values.title,
+    description: values.description,
+    priority: values.priority,
+    // `values.dueDate` llega como string "YYYY-MM-DD" desde el <input
+    // type="date">; Firestore necesita un Timestamp real (así lo exige
+    // `firestore.rules`, y es lo que permite comparar fechas al pintar
+    // el calendario).
+    dueDate: dateInputValueToTimestamp(values.dueDate),
     userId,
     completed: false,
     // Se calcula en el servidor de Firestore, no en el reloj del
@@ -70,7 +78,12 @@ export function createTask(userId: string, values: TaskFormValues) {
 }
 
 export function updateTask(taskId: string, values: TaskFormValues) {
-  return updateDoc(doc(db, "tasks", taskId), { ...values });
+  return updateDoc(doc(db, "tasks", taskId), {
+    title: values.title,
+    description: values.description,
+    priority: values.priority,
+    dueDate: dateInputValueToTimestamp(values.dueDate),
+  });
 }
 
 export function toggleTaskCompleted(taskId: string, completed: boolean) {

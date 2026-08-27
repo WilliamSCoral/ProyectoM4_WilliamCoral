@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Timestamp } from "firebase/firestore";
 import { EmailSummaryButton } from "../../src/components/EmailSummaryButton";
 import { sendTasksSummaryEmail } from "../../src/services/emailService";
 import type { Task } from "../../src/types/task";
@@ -20,8 +21,10 @@ function makeTask(overrides: Partial<Task>): Task {
     title: "Tarea",
     description: "",
     completed: false,
+    priority: "normal",
+    dueDate: Timestamp.now(),
     userId: "user-1",
-    createdAt: {} as Task["createdAt"],
+    createdAt: Timestamp.now(),
     ...overrides,
   };
 }

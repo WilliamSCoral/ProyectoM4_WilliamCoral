@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TaskForm } from "./TaskForm";
-import type { Task, TaskFormValues } from "../types/task";
+import { formatDate, timestampToDateInputValue, todayDateInputValue } from "../utils/date";
+import type { Task, TaskFormValues, TaskPriority } from "../types/task";
 
 interface TaskItemProps {
   task: Task;
@@ -8,6 +9,12 @@ interface TaskItemProps {
   onSave: (values: TaskFormValues) => Promise<void>;
   onDelete: () => Promise<void>;
 }
+
+const PRIORITY_LABELS: Record<TaskPriority, string> = {
+  normal: "Normal",
+  media: "Media",
+  alta: "Alta",
+};
 
 export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -30,7 +37,16 @@ export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
       <li className="task-item">
         <TaskForm
           className="task-form--edit"
-          initialValues={{ title: task.title, description: task.description }}
+          initialValues={{
+            title: task.title,
+            description: task.description,
+            // Fallback para tareas creadas antes de agregar estos
+            // campos: no deberían romper la edición.
+            priority: task.priority ?? "normal",
+            dueDate: task.dueDate
+              ? timestampToDateInputValue(task.dueDate)
+              : todayDateInputValue(),
+          }}
           submitLabel="Guardar cambios"
           onCancel={() => setIsEditing(false)}
           onSubmit={async (values) => {
@@ -41,6 +57,8 @@ export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
       </li>
     );
   }
+
+  const priority = task.priority ?? "normal";
 
   return (
     <li className={`task-item ${task.completed ? "task-item--completed" : ""}`}>
@@ -57,10 +75,20 @@ export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
         >
           {task.title}
         </span>
+        <span className={`priority-tag priority-tag--${priority}`}>
+          {PRIORITY_LABELS[priority]}
+        </span>
       </div>
       {task.description && (
         <p className="task-item__description">{task.description}</p>
       )}
+      <p className="task-item__meta">
+        {/* `createdAt` usa serverTimestamp(): en el primer snapshot
+            optimista (antes de que el servidor confirme la escritura)
+            Firestore lo entrega como `null`, no como el Timestamp real. */}
+        {task.createdAt ? `Creada el ${formatDate(task.createdAt)}` : "Guardando..."}
+        {task.dueDate && <> · Vence el {formatDate(task.dueDate)}</>}
+      </p>
       <div className="task-item__actions">
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
           Editar

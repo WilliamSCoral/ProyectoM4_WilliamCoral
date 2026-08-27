@@ -1,16 +1,18 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Home } from "../pages/Home";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { Tasks } from "../pages/Tasks";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
 
-// Hito 4 — Árbol de rutas de la app. Cualquier URL desconocida ("*") cae
-// en "/", que a su vez pasa por ProtectedRoute: así, si alguien pega una
-// URL protegida inexistente sin sesión, termina igual en /login.
+// Hito 4 (extra credit: Home pública) — "/" es la landing pública, sin
+// guardas: la ve cualquiera, esté o no logueado. Las tareas viven en
+// "/tareas", protegida. Cualquier URL desconocida ("*") cae en "/".
 export function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route
         path="/login"
         element={
@@ -28,7 +30,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/"
+        path="/tareas"
         element={
           <ProtectedRoute>
             <Tasks />

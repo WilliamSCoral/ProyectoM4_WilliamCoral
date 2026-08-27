@@ -20,9 +20,9 @@ export function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   // Hito 4 — Si ProtectedRoute mandó acá guardando la ruta original en
-  // `state.from`, volvemos ahí después de loguearse. Si no, a "/".
+  // `state.from`, volvemos ahí después de loguearse. Si no, a "/tareas".
   function redirectAfterAuth() {
-    navigate(state?.from?.pathname ?? "/", { replace: true });
+    navigate(state?.from?.pathname ?? "/tareas", { replace: true });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

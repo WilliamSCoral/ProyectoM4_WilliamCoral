@@ -14,7 +14,7 @@ export function PublicOnlyRoute({ children }: { children: ReactNode }) {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/tareas" replace />;
   }
 
   return <>{children}</>;
