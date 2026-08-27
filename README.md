@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 8 — Testing**.
+> hitos del proyecto. Estado actual: **Hito 9 — Deploy en Vercel (completo)**.
 
 ## Descripción del proyecto
 
@@ -180,6 +180,16 @@ hace posible mockear solo en los límites correctos —
 nada: los componentes de tareas (`TaskForm`, `TaskList`) ni siquiera
 necesitan mocks porque son puramente controlados por props.
 
+**Hito 9 — Deploy en Vercel:** las 8 variables de entorno se cargaron
+manualmente en el dashboard de Vercel (Settings → Environment Variables),
+nunca por código ni por CLI con los valores reales de por medio. Las 4
+`VITE_FIREBASE_*` se guardaron como tipo **Config** (no *Secret*): como
+Vite las expone igual en el bundle público por su prefijo, marcarlas
+como secretas no aporta nada — Vercel lo señala si se intenta. Las 4 de
+AWS/SES sí quedaron como **Secret**. El deploy se hizo con
+`vercel --prod` (el proyecto ya estaba vinculado desde que se usó
+`vercel dev` en el Hito 7), sin necesidad de conectar el repo de GitHub.
+
 Verificado con un envío real de punta a punta (`vercel dev` + AWS SES en
 modo Sandbox): la función respondió `ok: true` con `messageId`, y el
 email llegó a la bandeja real (en Spam la primera vez, esperable para un
@@ -238,7 +248,17 @@ frontend: quedarían expuestas en el bundle del navegador.
 
 ## URL de producción
 
-_(Se completa en el Hito 9 — Deploy en Vercel.)_
+**https://tareas-inky.vercel.app**
+
+Verificado en producción real (no solo en local):
+- Login/logout, rutas protegidas y persistencia de sesión.
+- CRUD de tareas contra Firestore (crear, editar, completar, eliminar),
+  actualizándose sin recargar.
+- Envío de resumen por email a través de la Vercel Function
+  `/api/send-email` (probado el camino de rechazo de SES; el de éxito ya
+  se había probado en local con un email verificado).
+- Diseño responsive en mobile (375px) y sin errores inesperados en la
+  consola del navegador.
 
 ## Flujo de envío de emails
 
@@ -270,11 +290,66 @@ Requisitos en AWS (una sola vez, fuera del código):
 
 ## Uso de IA en el proyecto
 
-_(Se completa progresivamente. Este proyecto se desarrolló con Claude como
-asistente de desarrollo. Se documentará aquí qué prompts se utilizaron, en
-qué situaciones fue más efectiva la asistencia de IA, y qué decisiones se
-tomaron a partir de las respuestas generadas — evitando copiar código sin
-comprenderlo.)_
+Usé Claude (Claude Code) como asistente de desarrollo a lo largo de los
+9 hitos, pero con un alcance acotado a propósito: le pedí ayuda puntual
+en la estructura funcional del proyecto, la configuración de Firebase, la
+configuración de AWS (el código, no las credenciales), el manejo de
+tests y errores, y la parte visual de la SPA. El resto de las decisiones
+de arquitectura, y toda la configuración sensible (crear el usuario IAM,
+generar las Access Keys, verificar identidades en SES, cargar las
+variables de entorno reales en Firebase/Vercel) las hice yo mismo,
+manualmente, sin pasarle nunca esos valores a la IA.
+
+**Dónde fue más efectiva:**
+
+- **Estructura funcional inicial:** Vite + React + TypeScript, capas
+  (`services/`, `hooks/`, `components/`, `pages/`, `types/`, `utils/`) y
+  el patrón de mantener cada integración externa (Firebase, AWS SES)
+  aislada en una única capa de servicio. Esto simplificó mucho el
+  testing después: los componentes de tareas ni siquiera necesitaron
+  mocks porque reciben todo por props.
+- **Firebase:** el patrón `Authenticator` (Context + `onAuthStateChanged`
+  + hook `useAuth`) para centralizar la sesión, y las Security Rules de
+  Firestore con ownership por `userId`. Le pedí explícitamente que
+  siguiera el mismo patrón que se explica en las clases del curso, en
+  vez de una implementación genérica, para no desviarme de lo que se
+  evalúa.
+- **AWS SES:** el patrón BFF (`api/send-email.ts` como única pieza con
+  acceso a las credenciales, patrón "mesero/cocina" de la clase) y el
+  componente de UI para el botón de envío. Yo hice todo el circuito de
+  AWS Console (usuario IAM, políticas, verificación de identidades en
+  modo Sandbox) y cargué las variables directamente en mi `.env` y en
+  Vercel.
+- **Tests y manejo de errores:** la estrategia de mockear en los límites
+  correctos (`hooks/useAuth`, `services/emailService`) en vez de mockear
+  Firebase directamente, y traducir los códigos de error de Firebase a
+  mensajes legibles en vez de mostrarlos crudos al usuario.
+- **Parte visual:** el sistema de variables CSS para modo claro/oscuro
+  (automático por `prefers-color-scheme` + interruptor manual) y el
+  enfoque mobile-first en ese orden estricto (mobile → tablet → desktop).
+
+**Patrones que aprendí a usar:**
+
+- Pedirle que se basara en el material de clase (lectures del curso)
+  antes de implementar, en vez de aceptar la primera solución genérica
+  que proponía — varias veces el patrón que enseñaba la clase era
+  distinto (y más específico) de lo que la IA hubiera hecho por
+  defecto.
+- No aceptar ningún hito como terminado solo porque el código "se veía
+  bien": pedí que se probara cada uno de verdad (`npm run typecheck`,
+  `npm run build`, y probando el flujo real en el navegador o contra
+  Firebase/AWS reales) antes de darlo por hecho. Esto sirvió: en un
+  momento se descubrió que el script `npm run typecheck` llevaba
+  configurado mal desde el Hito 1 y en realidad no estaba chequeando
+  ningún archivo — se corrigió al auditarlo en vez de confiar en que
+  "pasaba en verde".
+- Trazar una línea clara sobre qué nunca le paso a la IA: cualquier
+  credencial (API keys de AWS, contraseñas, tokens) la cargué yo mismo
+  directamente en `.env` o en el dashboard de Vercel, nunca pegada en el
+  chat.
+- Usarla para acelerar el "primer borrador" (formularios, reglas de
+  seguridad, tests) y revisar/entender ese borrador antes de aceptarlo,
+  en vez de copiarlo sin leerlo.
 
 ## Estado del proyecto (hitos)
 
@@ -286,4 +361,4 @@ comprenderlo.)_
 - [x] Hito 6 — CRUD de tareas
 - [x] Hito 7 — Email con AWS SES
 - [x] Hito 8 — Testing
-- [ ] Hito 9 — Deploy en Vercel
+- [x] Hito 9 — Deploy en Vercel
