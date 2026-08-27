@@ -17,4 +17,5 @@ export interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signInWithGoogle: () => Promise<UserCredential>;
   logout: () => Promise<void>;
+  changePassword: (newPassword: string) => Promise<void>;
 }

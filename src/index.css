@@ -365,6 +365,11 @@ button {
   color: var(--color-info-text);
 }
 
+.alert-success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
 .state-message {
   color: var(--color-text-muted);
   padding: 1rem 0;
@@ -392,6 +397,14 @@ button {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+.account-email {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
 }
 
 .auth-divider {

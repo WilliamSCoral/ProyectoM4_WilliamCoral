@@ -37,6 +37,7 @@ describe("Login", () => {
       signIn,
       signInWithGoogle,
       logout: vi.fn(),
+      changePassword: vi.fn(),
     });
   });
 

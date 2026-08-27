@@ -1,9 +1,12 @@
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   GoogleAuthProvider,
+  linkWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updatePassword,
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -38,4 +41,32 @@ export function loginWithGoogle() {
 
 export function logout() {
   return signOut(auth);
+}
+
+// Caso real que motivó esto: alguien crea una cuenta con contraseña y
+// después inicia sesión con Google usando el mismo email — Firebase
+// linkea ambos proveedores a la misma cuenta, pero eso no le da
+// automáticamente una contraseña nueva a esa persona si nunca la usó o
+// no la recuerda. `updatePassword` sirve si ya tiene el proveedor
+// "password"; si no lo tiene (por ejemplo, la cuenta se creó solo con
+// Google), `linkWithCredential` se lo agrega por primera vez.
+export async function changePassword(newPassword: string): Promise<void> {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    throw new Error("No hay una sesión activa.");
+  }
+
+  const hasPasswordProvider = user.providerData.some(
+    (provider) => provider.providerId === "password",
+  );
+
+  if (hasPasswordProvider) {
+    await updatePassword(user, newPassword);
+    return;
+  }
+
+  await linkWithCredential(
+    user,
+    EmailAuthProvider.credential(user.email, newPassword),
+  );
 }

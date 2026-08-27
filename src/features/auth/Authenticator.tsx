@@ -46,6 +46,7 @@ export function Authenticator({ children }: { children: ReactNode }) {
     signIn: authService.loginWithEmail,
     signInWithGoogle: authService.loginWithGoogle,
     logout: authService.logout,
+    changePassword: authService.changePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

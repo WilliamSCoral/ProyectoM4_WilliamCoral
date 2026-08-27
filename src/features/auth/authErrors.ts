@@ -25,6 +25,10 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Este método de acceso no está habilitado todavía. Contactá al administrador del proyecto.",
   "auth/account-exists-with-different-credential":
     "Ya existe una cuenta con ese email registrada con otro método de acceso.",
+  "auth/requires-recent-login":
+    "Por seguridad, esta acción requiere una sesión reciente. Cerrá sesión, volvé a iniciarla y probá de nuevo.",
+  "auth/credential-already-in-use":
+    "Esa contraseña ya está asociada a otra cuenta.",
 };
 
 const DEFAULT_MESSAGE = "Ocurrió un error inesperado. Intentá de nuevo.";

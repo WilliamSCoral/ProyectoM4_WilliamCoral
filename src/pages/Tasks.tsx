@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTasks } from "../hooks/useTasks";
 import {
@@ -78,7 +79,10 @@ export function Tasks() {
       <h1 className="tasks-page__title">Mis tareas</h1>
 
       <div className="tasks-topbar">
-        <p className="tasks-topbar__user">Sesión iniciada como {user?.email}.</p>
+        <p className="tasks-topbar__user">
+          Sesión iniciada como {user?.email}.{" "}
+          <Link to="/cuenta">Cambiar contraseña</Link>
+        </p>
         {user?.email && <EmailSummaryButton userEmail={user.email} tasks={tasks} />}
       </div>
 
