@@ -1,25 +1,17 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getAuthErrorMessage } from "../features/auth/authErrors";
 import { validateEmail, validatePassword } from "../utils/validators";
 
 export function Register() {
-  const { signUp, signInWithGoogle, googleRedirectError } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Ver el mismo efecto en Login: el login con Google recarga la página
-  // por completo, así que un error solo puede llegar acá después.
-  useEffect(() => {
-    if (googleRedirectError) {
-      setFormError(googleRedirectError);
-    }
-  }, [googleRedirectError]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,10 +43,11 @@ export function Register() {
     setFormError(null);
     setSubmitting(true);
     try {
-      // Igual que en Login: a partir de acá la pestaña navega a Google.
       await signInWithGoogle();
+      navigate("/tareas", { replace: true });
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
+    } finally {
       setSubmitting(false);
     }
   }

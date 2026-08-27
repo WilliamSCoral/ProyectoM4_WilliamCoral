@@ -1,9 +1,8 @@
 import {
   createUserWithEmailAndPassword,
-  getRedirectResult,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
-  signInWithRedirect,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 import { auth } from "./firebase";
@@ -22,25 +21,19 @@ export function loginWithEmail(email: string, password: string) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
-// `signInWithPopup` depende de que el navegador permita abrir una
-// ventana y de que esta pueda avisarle a la pestaña original que
-// terminó (vía `window.opener`/`window.closed`). En producción (Vercel)
-// esto falla en varios navegadores por las políticas de aislamiento de
-// origen (Cross-Origin-Opener-Policy): la ventana se abre y se cierra
-// sola de inmediato, sin completar el login. `signInWithRedirect` evita
-// el problema de raíz porque no depende de ninguna ventana emergente: la
-// propia pestaña navega a Google y vuelve.
+// Se probó `signInWithRedirect` como alternativa a `signInWithPopup`,
+// pero en producción el viaje de ida y vuelta por Google (tu dominio ->
+// accounts.google.com -> el `authDomain` de Firebase -> tu dominio de
+// nuevo) perdía el estado silenciosamente en el navegador probado
+// (sin ningún error, simplemente no completaba el login) — muy probable
+// por bloqueo de cookies/almacenamiento de terceros en ese viaje. El
+// problema original de `signInWithPopup` ("se abre y se cierra la
+// ventana") era en realidad porque el dominio de producción no estaba
+// en la lista de dominios autorizados de Firebase (ya corregido en la
+// consola); con eso resuelto, el popup evita el viaje de ida y vuelta
+// por completo y es más confiable acá.
 export function loginWithGoogle() {
-  return signInWithRedirect(auth, new GoogleAuthProvider());
-}
-
-// Se llama una sola vez al iniciar la app (`Authenticator`) para
-// recuperar el resultado de ese viaje de ida y vuelta a Google — sobre
-// todo para poder mostrar un error legible si Google devolvió uno, ya
-// que la página que inició el login se recarga por completo y pierde
-// cualquier `try/catch` que tuviera en memoria.
-export function getGoogleRedirectResult() {
-  return getRedirectResult(auth);
+  return signInWithPopup(auth, new GoogleAuthProvider());
 }
 
 export function logout() {
