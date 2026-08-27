@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 7 — Email con AWS SES**.
+> hitos del proyecto. Estado actual: **Hito 8 — Testing**.
 
 ## Descripción del proyecto
 
@@ -171,6 +171,15 @@ verificadas en la consola de SES, en la misma región que `AWS_REGION`.
 Sin esto la función responde `MessageRejected` aunque el código esté
 bien. Ver la sección de variables de entorno más abajo.
 
+**Hito 8 — Testing:** 30 tests en 7 archivos (`npm run test`), ver
+[tests/README.md](tests/README.md) para el detalle. La arquitectura por
+capas de los hitos anteriores (servicios separados de componentes,
+acciones pasadas por props en vez de importadas directamente) es lo que
+hace posible mockear solo en los límites correctos —
+`services/emailService` y `hooks/useAuth` — sin tocar Firebase para
+nada: los componentes de tareas (`TaskForm`, `TaskList`) ni siquiera
+necesitan mocks porque son puramente controlados por props.
+
 Verificado con un envío real de punta a punta (`vercel dev` + AWS SES en
 modo Sandbox): la función respondió `ok: true` con `messageId`, y el
 email llegó a la bandeja real (en Spam la primera vez, esperable para un
@@ -276,5 +285,5 @@ comprenderlo.)_
 - [x] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
 - [x] Hito 6 — CRUD de tareas
 - [x] Hito 7 — Email con AWS SES
-- [ ] Hito 8 — Testing
+- [x] Hito 8 — Testing
 - [ ] Hito 9 — Deploy en Vercel
