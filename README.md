@@ -260,6 +260,20 @@ Verificado en producción real (no solo en local):
 - Diseño responsive en mobile (375px) y sin errores inesperados en la
   consola del navegador.
 
+### Cuenta de prueba
+
+Para verificar el flujo completo (login, CRUD y envío de email) sin
+crear una cuenta nueva:
+
+| Email | Contraseña |
+|---|---|
+| `test.pim444@gmail.com` | `test123` |
+
+Esta cuenta es solo para evaluación — no tiene datos sensibles. Al
+apretar "Enviar resumen por email" logueado con ella, el email llega
+realmente a esa bandeja (`test.pim444@gmail.com` está verificada en AWS
+SES), así que sirve para confirmar el envío real, no solo la UI.
+
 ## Flujo de envío de emails
 
 1. En la pantalla de tareas, la persona usuaria hace clic en **"Enviar
