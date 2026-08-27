@@ -19,3 +19,10 @@ export function validatePassword(password: string): string | null {
   }
   return null;
 }
+
+// Hito 6 — La descripción es opcional, pero el título es lo único que
+// realmente identifica a una tarea en la lista.
+export function validateTaskTitle(title: string): string | null {
+  if (!title.trim()) return "El título es obligatorio.";
+  return null;
+}

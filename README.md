@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 4 — Rutas protegidas**.
+> hitos del proyecto. Estado actual: **Hito 6 — CRUD de tareas**.
 
 ## Descripción del proyecto
 
@@ -105,6 +105,27 @@ probar puntualmente si un usuario puede leer las tareas de otro:
   **rechazado**. Esta es la prueba explícita de que un usuario no puede
   leer las tareas de otro.
 
+**Hito 6 — CRUD de tareas:** [services/taskService.ts](src/services/taskService.ts)
+es la única capa que llama a `firebase/firestore` para tareas — igual que
+`authService.ts` en el Hito 3, ningún componente importa Firestore
+directamente. La lectura usa `onSnapshot` en vez de una consulta única
+(`getDocs`), así la UI se actualiza sola ante cualquier cambio (propio o
+de otra pestaña) sin recargar la página. El hook
+[hooks/useTasks.ts](src/hooks/useTasks.ts) encapsula esa suscripción con
+sus estados de `loading`/`error` y cancela la suscripción (cleanup) al
+desmontar o cambiar de usuario, para no dejar listeners de Firestore
+abiertos de más. `TaskForm` es un único componente controlado reutilizado
+tanto para crear como para editar (el modo lo determina si recibe
+`initialValues`), evitando duplicar validación y lógica de submit.
+
+⚠️ **Índice compuesto de Firestore:** la consulta combina
+`where("userId", "==", uid)` con `orderBy("createdAt", "desc")`, algo que
+Firestore no puede resolver sin un índice compuesto. La primera vez que
+corre, tira un error `failed-precondition` con un link para crearlo desde
+la consola de Firebase (tarda 1-2 minutos en construirse). Ya se creó
+para este proyecto; si se clona en un proyecto de Firebase nuevo, hay que
+crearlo de nuevo la primera vez.
+
 _(Esta sección se ampliará con las decisiones tomadas en cada hito.)_
 
 ## Instrucciones de instalación
@@ -177,7 +198,7 @@ comprenderlo.)_
 - [x] Hito 3 — Autenticación
 - [x] Hito 4 — Rutas protegidas
 - [x] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
-- [ ] Hito 6 — CRUD de tareas
+- [x] Hito 6 — CRUD de tareas
 - [ ] Hito 7 — Email con AWS SES
 - [ ] Hito 8 — Testing
 - [ ] Hito 9 — Deploy en Vercel
