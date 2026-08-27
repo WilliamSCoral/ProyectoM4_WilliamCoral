@@ -2,27 +2,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 // Extra credit — "/" deja de ser directo el login: ahora es una landing
-// pública que explica la app. El botón de arriba a la derecha se adapta
-// según haya o no sesión, en vez de redirigir automáticamente — así
-// alguien que ya tiene cuenta pero quiere releer la landing puede
-// hacerlo sin que lo manden de una a /tareas.
+// pública que explica la app. La navegación (Inicio / Iniciar sesión /
+// Mis tareas) vive en el header fijo compartido (`AppHeader`), no acá.
 export function Home() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="home-page">
-      <nav className="home-nav">
-        <span className="home-nav__brand">Gestor Estratégico de Tareas</span>
-        {!loading && (
-          <Link
-            to={user ? "/tareas" : "/login"}
-            className="btn btn-primary btn-sm"
-          >
-            {user ? "Ir a mis tareas" : "Iniciar sesión"}
-          </Link>
-        )}
-      </nav>
-
       <section className="home-hero">
         <h1>Organizá tus tareas sin perder de vista lo importante</h1>
         <p>

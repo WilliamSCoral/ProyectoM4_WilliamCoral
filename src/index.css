@@ -37,6 +37,11 @@
   --priority-normal: #16a34a;
   --priority-media: #f59e0b;
   --priority-alta: #dc2626;
+
+  /* Extra credit — Alto del header fijo, compartido entre `.app-header`
+     y el padding-top de `.app-main` para que el contenido nunca quede
+     tapado detrás del header. */
+  --header-height: 4rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -114,42 +119,106 @@ button {
   font: inherit;
 }
 
-/* Contenedor de toda la app. Cada página (auth-page / tasks-page) define
-   su propio ancho máximo por dentro, así el login queda angosto y
-   centrado mientras que Tareas puede ocupar más espacio. */
+/* Contenedor de toda la app. `.app-header` queda fijo arriba; `.app-main`
+   es lo único que hace scroll y compensa con padding-top la altura del
+   header para que nada quede tapado. Cada página (auth-page / tasks-page)
+   sigue definiendo su propio ancho máximo por dentro, así el login queda
+   angosto y centrado mientras que Tareas puede ocupar más espacio. */
 .app-shell {
   min-height: 100vh;
-  padding: 1rem;
+}
+
+/* Extra credit — Header fijo compartido por toda la app (Home, Login,
+   Register, Tareas): "Inicio" siempre a la izquierda, y a la derecha
+   "Iniciar sesión" (sin sesión) o "Mis tareas" + "Cerrar sesión" (con
+   sesión), para poder moverse entre Home y Tareas sin cerrar sesión. */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: var(--header-height);
+  padding: 0.75rem 1rem;
+  padding-top: calc(0.75rem + env(safe-area-inset-top));
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.app-header__brand {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.app-header__brand-text--full {
+  display: none;
+}
+
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.app-main {
+  padding: calc(var(--header-height) + env(safe-area-inset-top) + 1rem) 1rem 1rem;
 }
 
 @media (min-width: 768px) {
-  .app-shell {
-    padding: 2rem 1.5rem;
+  .app-header {
+    padding: 0.75rem 1.5rem;
+    padding-top: calc(0.75rem + env(safe-area-inset-top));
+  }
+
+  .app-header__brand {
+    font-size: 1.0625rem;
+  }
+
+  .app-header__brand-text--short {
+    display: none;
+  }
+
+  .app-header__brand-text--full {
+    display: inline;
+  }
+
+  .app-main {
+    padding: calc(var(--header-height) + env(safe-area-inset-top) + 1.5rem) 1.5rem 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .app-shell {
-    padding: 3rem 2rem;
+  .app-main {
+    width: 90%;
+    max-width: 90%;
+    margin: 0 auto;
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top) + 2rem);
+    padding-bottom: 2rem;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
-/* Interruptor de tema: fijo en la esquina para estar disponible desde
-   cualquier pantalla (login, registro o tareas) sin ocupar espacio del
-   layout. `env(safe-area-inset-*)` evita que quede tapado por el notch
-   en celulares. */
+/* Interruptor de tema: ahora vive como un ítem más dentro de
+   `.app-header__actions`, ya no fijo por su cuenta (el header ya está
+   fijo y lo contiene). */
 .theme-toggle {
-  position: fixed;
-  top: calc(0.75rem + env(safe-area-inset-top));
-  right: calc(0.75rem + env(safe-area-inset-right));
-  z-index: 50;
-  width: 2.75rem;
-  height: 2.75rem;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -307,8 +376,7 @@ button {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  min-height: calc(100vh - 2rem);
-  padding-top: 2rem;
+  min-height: 60vh;
 }
 
 .auth-card {
@@ -361,10 +429,6 @@ button {
 }
 
 @media (min-width: 768px) {
-  .auth-page {
-    padding-top: 4rem;
-  }
-
   .auth-card {
     padding: 2.5rem 2.5rem;
   }
@@ -376,32 +440,37 @@ button {
   margin: 0 auto;
 }
 
-.tasks-header {
+.tasks-page__title {
+  font-size: 1.375rem;
+  margin-bottom: 1rem;
+}
+
+.tasks-topbar {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  padding: 1.25rem;
   margin-bottom: 1.5rem;
 }
 
-.tasks-header h1 {
-  font-size: 1.375rem;
-}
-
-.tasks-header__user {
+.tasks-topbar__user {
   color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
-.tasks-header__actions {
+/* Extra credit — Layout de dos paneles en escritorio: izquierda (1/3)
+   crear tarea + calendario, derecha (2/3) filtros + lista. Apilado en
+   mobile/tablet, como corresponde a un enfoque mobile-first. */
+.tasks-layout {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tasks-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
 
 .email-summary {
@@ -512,20 +581,26 @@ button {
     max-width: 40rem;
   }
 
-  .tasks-header {
+  .tasks-topbar {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
-
-  .tasks-header__actions {
-    justify-content: flex-end;
-  }
 }
 
 @media (min-width: 1024px) {
+  /* A partir de acá `.tasks-page` deja de limitarse a sí misma: ocupa
+     todo el 90% de ancho que ya le da `.app-main`, y es `.tasks-layout`
+     el que reparte ese espacio en los dos paneles (1/3 y 2/3). */
   .tasks-page {
-    max-width: 48rem;
+    max-width: none;
+  }
+
+  .tasks-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    align-items: start;
+    gap: 2rem;
   }
 }
 
@@ -744,20 +819,6 @@ button {
 .home-page {
   max-width: 64rem;
   margin: 0 auto;
-}
-
-.home-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.5rem 0 1.5rem;
-  flex-wrap: wrap;
-}
-
-.home-nav__brand {
-  font-weight: 700;
-  font-size: 1.0625rem;
 }
 
 .home-hero {

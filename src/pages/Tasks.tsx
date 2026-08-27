@@ -18,7 +18,7 @@ import type { Task, TaskFormValues } from "../types/task";
 // Hito 6 — Reemplaza el placeholder del Hito 4: ahora esta ruta
 // protegida muestra el CRUD real de tareas del usuario autenticado.
 export function Tasks() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { tasks, loading, error } = useTasks();
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -75,60 +75,62 @@ export function Tasks() {
 
   return (
     <div className="tasks-page">
-      <header className="tasks-header">
-        <div>
-          <h1>Gestor Estratégico de Tareas</h1>
-          <p className="tasks-header__user">Sesión iniciada como {user?.email}.</p>
-        </div>
-        <div className="tasks-header__actions">
-          {user?.email && <EmailSummaryButton userEmail={user.email} tasks={tasks} />}
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => logout()}>
-            Cerrar sesión
-          </button>
-        </div>
-      </header>
+      <h1 className="tasks-page__title">Mis tareas</h1>
 
-      <TaskForm submitLabel="Agregar tarea" onSubmit={handleCreate} />
+      <div className="tasks-topbar">
+        <p className="tasks-topbar__user">Sesión iniciada como {user?.email}.</p>
+        {user?.email && <EmailSummaryButton userEmail={user.email} tasks={tasks} />}
+      </div>
 
-      <TaskCalendar tasks={tasks} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+      {/* Extra credit — Layout de dos paneles en escritorio: a la
+          izquierda se crea la tarea y se ve el calendario; a la derecha,
+          los filtros y la lista. En mobile/tablet queda todo apilado. */}
+      <div className="tasks-layout">
+        <section className="tasks-panel tasks-panel--left">
+          <TaskForm submitLabel="Agregar tarea" onSubmit={handleCreate} />
+          <TaskCalendar tasks={tasks} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        </section>
 
-      {selectedDate && (
-        <p className="task-filters__selected-date">
-          Mostrando tareas del {selectedDate.toLocaleDateString("es-AR")}.{" "}
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSelectedDate(null)}>
-            Quitar filtro de fecha
-          </button>
-        </p>
-      )}
+        <section className="tasks-panel tasks-panel--right">
+          {selectedDate && (
+            <p className="task-filters__selected-date">
+              Mostrando tareas del {selectedDate.toLocaleDateString("es-AR")}.{" "}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSelectedDate(null)}>
+                Quitar filtro de fecha
+              </button>
+            </p>
+          )}
 
-      <TaskFilters
-        status={statusFilter}
-        onStatusChange={setStatusFilter}
-        priority={priorityFilter}
-        onPriorityChange={setPriorityFilter}
-        search={search}
-        onSearchChange={setSearch}
-      />
+          <TaskFilters
+            status={statusFilter}
+            onStatusChange={setStatusFilter}
+            priority={priorityFilter}
+            onPriorityChange={setPriorityFilter}
+            search={search}
+            onSearchChange={setSearch}
+          />
 
-      {actionError && (
-        <p className="alert alert-error" role="alert">
-          {actionError}
-        </p>
-      )}
-      {loading && <p className="state-message">Cargando tareas...</p>}
-      {error && (
-        <p className="alert alert-error" role="alert">
-          {error}
-        </p>
-      )}
-      {!loading && !error && (
-        <TaskList
-          tasks={filteredTasks}
-          onToggle={handleToggle}
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
-      )}
+          {actionError && (
+            <p className="alert alert-error" role="alert">
+              {actionError}
+            </p>
+          )}
+          {loading && <p className="state-message">Cargando tareas...</p>}
+          {error && (
+            <p className="alert alert-error" role="alert">
+              {error}
+            </p>
+          )}
+          {!loading && !error && (
+            <TaskList
+              tasks={filteredTasks}
+              onToggle={handleToggle}
+              onSave={handleSave}
+              onDelete={handleDelete}
+            />
+          )}
+        </section>
+      </div>
     </div>
   );
 }
