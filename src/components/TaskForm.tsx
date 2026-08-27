@@ -129,12 +129,7 @@ export function TaskForm({
       </div>
 
       <div className="field">
-        <label htmlFor={priorityId}>
-          Prioridad:{" "}
-          <span className={`priority-tag priority-tag--${priority}`}>
-            {PRIORITY_LABELS[priority]}
-          </span>
-        </label>
+        <label htmlFor={priorityId}>Prioridad</label>
         <input
           id={priorityId}
           type="range"
@@ -142,12 +137,32 @@ export function TaskForm({
           max={TASK_PRIORITIES.length - 1}
           step={1}
           value={priorityIndex}
+          aria-valuetext={PRIORITY_LABELS[priority]}
           onChange={(event) =>
             setPriority(TASK_PRIORITIES[Number(event.target.value)])
           }
           className={`priority-slider priority-slider--${priority}`}
           disabled={submitting}
         />
+        {/* Los 3 botones marcan a qué corresponde cada posición del
+            deslizador y también sirven como atajo: tocar uno cambia la
+            prioridad sin tener que arrastrar el thumb. */}
+        <div className="priority-slider__ticks">
+          {TASK_PRIORITIES.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={`priority-slider__tick priority-slider__tick--${value} ${
+                value === priority ? "priority-slider__tick--active" : ""
+              }`}
+              aria-pressed={value === priority}
+              onClick={() => setPriority(value)}
+              disabled={submitting}
+            >
+              {PRIORITY_LABELS[value]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {formError && (

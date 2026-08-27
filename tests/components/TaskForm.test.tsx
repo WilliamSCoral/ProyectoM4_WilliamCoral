@@ -83,6 +83,23 @@ describe("TaskForm", () => {
     );
   });
 
+  it("toca el botón de prioridad 'Alta' y lo manda en el payload", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+
+    render(<TaskForm submitLabel="Agregar tarea" onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText("Título"), "Tarea urgente");
+    await user.click(screen.getByRole("button", { name: "Alta" }));
+    await user.click(screen.getByRole("button", { name: "Agregar tarea" }));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ priority: "alta" }),
+      ),
+    );
+  });
+
   it("no limpia el formulario al guardar en modo edición", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);

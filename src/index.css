@@ -682,6 +682,53 @@ button {
   background: var(--priority-alta);
 }
 
+/* Marcan a qué corresponde cada una de las 3 posiciones del deslizador
+   (antes solo se veía el color del thumb, sin ninguna referencia de qué
+   significaba cada punto) y además funcionan como botones: tocar uno
+   cambia la prioridad sin arrastrar. */
+.priority-slider__ticks {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}
+
+.priority-slider__tick {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.priority-slider__tick:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.priority-slider__tick--active.priority-slider__tick--normal {
+  background: var(--priority-normal);
+  border-color: var(--priority-normal);
+  color: #ffffff;
+}
+
+.priority-slider__tick--active.priority-slider__tick--media {
+  background: var(--priority-media);
+  border-color: var(--priority-media);
+  color: #ffffff;
+}
+
+.priority-slider__tick--active.priority-slider__tick--alta {
+  background: var(--priority-alta);
+  border-color: var(--priority-alta);
+  color: #ffffff;
+}
+
 .task-item__meta {
   color: var(--color-text-muted);
   font-size: 0.8125rem;
