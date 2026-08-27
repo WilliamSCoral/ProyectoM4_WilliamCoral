@@ -9,6 +9,7 @@ import {
 } from "../services/taskService";
 import { TaskForm } from "../components/TaskForm";
 import { TaskList } from "../components/TaskList";
+import { EmailSummaryButton } from "../components/EmailSummaryButton";
 import type { Task, TaskFormValues } from "../types/task";
 
 // Hito 6 — Reemplaza el placeholder del Hito 4: ahora esta ruta
@@ -52,6 +53,7 @@ export function Tasks() {
           <p className="tasks-header__user">Sesión iniciada como {user?.email}.</p>
         </div>
         <div className="tasks-header__actions">
+          {user?.email && <EmailSummaryButton userEmail={user.email} tasks={tasks} />}
           <button type="button" className="btn btn-outline btn-sm" onClick={() => logout()}>
             Cerrar sesión
           </button>

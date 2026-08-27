@@ -5,7 +5,7 @@ autenticación de usuarios, persistencia en la nube por usuario, envío de
 notificaciones por email y deploy en producción.
 
 > 🚧 Este README se completa progresivamente a medida que se avanza en los
-> hitos del proyecto. Estado actual: **Hito 6 — CRUD de tareas**.
+> hitos del proyecto. Estado actual: **Hito 7 — Email con AWS SES**.
 
 ## Descripción del proyecto
 
@@ -149,6 +149,36 @@ guarda en `localStorage` y un pequeño script inline en `index.html` la
 aplica antes de que React monte, para que no haya parpadeo del tema
 equivocado al recargar.
 
+**Hito 7 — Email con AWS SES (patrón BFF):** el frontend nunca llama a
+AWS directamente ni conoce ninguna credencial de AWS — solo hace un
+`fetch` a `POST /api/send-email` con `{ to, summary }`.
+[api/send-email.ts](api/send-email.ts) es la única pieza del proyecto
+con acceso a las variables `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`
+(sin prefijo `VITE_`, así jamás llegan al bundle del navegador) y es la
+que arma el `SendEmailCommand` del AWS SDK v3 y habla con SES. Vive en
+`api/` (no en `functions/`, como sugiere la estructura de la consigna)
+porque esa es la convención real que usa Vercel para detectar
+Serverless Functions sin configuración adicional: un archivo en
+`api/send-email.ts` queda expuesto automáticamente en `/api/send-email`.
+[services/emailService.ts](src/services/emailService.ts) es la única
+capa del frontend que hace ese `fetch`; [EmailSummaryButton.tsx](src/components/EmailSummaryButton.tsx)
+solo maneja los estados `idle`/`loading`/`success`/`error` del botón.
+
+⚠️ **Requiere configuración externa en AWS** que no vive en el código:
+un usuario IAM con permiso `ses:SendEmail`, y las identidades (remitente
+y, mientras la cuenta esté en modo Sandbox, también el destinatario)
+verificadas en la consola de SES, en la misma región que `AWS_REGION`.
+Sin esto la función responde `MessageRejected` aunque el código esté
+bien. Ver la sección de variables de entorno más abajo.
+
+Verificado con un envío real de punta a punta (`vercel dev` + AWS SES en
+modo Sandbox): la función respondió `ok: true` con `messageId`, y el
+email llegó a la bandeja real (en Spam la primera vez, esperable para un
+remitente nuevo sin reputación — no es un bug). También se probó el
+camino de error: un usuario con un email no verificado en SES recibe el
+mensaje real de AWS (`MessageRejected`) mostrado en la UI, sin exponer
+ningún detalle interno roto.
+
 ## Instrucciones de instalación
 
 ```bash
@@ -171,10 +201,11 @@ Scripts disponibles:
 
 | Script | Qué hace |
 |---|---|
-| `npm run dev` | Levanta el servidor de desarrollo de Vite |
-| `npm run build` | Chequea tipos y genera el build de producción |
+| `npm run dev` | Levanta el servidor de desarrollo de Vite (no sirve `/api/*`) |
+| `npm run dev:functions` | Levanta todo con Vercel CLI, incluidas las Serverless Functions de `api/` — necesario para probar el envío de email en local |
+| `npm run build` | Chequea tipos (app + `api/`) y genera el build de producción |
 | `npm run preview` | Sirve el build de producción localmente |
-| `npm run typecheck` | Corre el compilador de TypeScript sin emitir archivos |
+| `npm run typecheck` | Chequea tipos en `src/`, `api/` y la config de Vite, sin emitir archivos |
 | `npm run test` | Corre los tests una vez (Vitest) |
 | `npm run test:watch` | Corre los tests en modo watch |
 
@@ -202,7 +233,31 @@ _(Se completa en el Hito 9 — Deploy en Vercel.)_
 
 ## Flujo de envío de emails
 
-_(Se completa en el Hito 7 — Email con AWS SES.)_
+1. En la pantalla de tareas, la persona usuaria hace clic en **"Enviar
+   resumen por email"**.
+2. El frontend arma un resumen en texto plano a partir de las tareas ya
+   cargadas (`utils/taskSummary.ts`: cuántas hay en total, pendientes y
+   completadas, con sus títulos) y llama a
+   `POST /api/send-email` con `{ to: <email del usuario>, summary }`.
+3. La Vercel Function `api/send-email.ts` valida el body, arma un
+   `SendEmailCommand` del AWS SDK v3 y lo envía usando `SESClient` con
+   las credenciales que solo existen como variables de entorno del
+   servidor.
+4. AWS SES procesa el envío y la función responde `{ ok: true,
+   messageId }` o `{ ok: false, error, message }`.
+5. El botón refleja el resultado: mientras espera dice "Enviando...",
+   y al terminar muestra la confirmación o el mensaje de error —nunca
+   un código interno sin explicar.
+
+Requisitos en AWS (una sola vez, fuera del código):
+
+- Usuario IAM dedicado (ej. `ses-sender`) con permiso para
+  `ses:SendEmail` — nunca se usan las credenciales de la cuenta raíz.
+- Identidad del remitente (`SES_SOURCE_EMAIL`) verificada en SES, en la
+  región de `AWS_REGION`.
+- Mientras la cuenta de SES esté en modo Sandbox, el email de
+  **destino** también debe estar verificado (SES no lo enviará si no
+  lo está, aunque el código sea correcto).
 
 ## Uso de IA en el proyecto
 
@@ -220,6 +275,6 @@ comprenderlo.)_
 - [x] Hito 4 — Rutas protegidas
 - [x] Hito 5 — Modelo de datos y seguridad (Firestore Rules)
 - [x] Hito 6 — CRUD de tareas
-- [ ] Hito 7 — Email con AWS SES
+- [x] Hito 7 — Email con AWS SES
 - [ ] Hito 8 — Testing
 - [ ] Hito 9 — Deploy en Vercel

@@ -32,3 +32,6 @@ npm-debug.log*
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Credenciales de AWS descargadas desde IAM (NUNCA se suben al repositorio)
+*_accessKeys.csv
