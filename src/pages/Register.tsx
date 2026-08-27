@@ -53,50 +53,72 @@ export function Register() {
   }
 
   return (
-    <section>
-      <h1>Crear cuenta</h1>
-      <form onSubmit={handleSubmit} noValidate>
-        <label htmlFor="register-email">Email</label>
-        <input
-          id="register-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          autoComplete="email"
-        />
+    <div className="auth-page">
+      <section className="auth-card">
+        <h1>Creá tu cuenta</h1>
 
-        <label htmlFor="register-password">Contraseña</label>
-        <input
-          id="register-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="new-password"
-        />
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="field">
+            <label htmlFor="register-email">Email</label>
+            <input
+              id="register-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+            />
+          </div>
 
-        <label htmlFor="register-confirm-password">Confirmar contraseña</label>
-        <input
-          id="register-confirm-password"
-          type="password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-          autoComplete="new-password"
-        />
+          <div className="field">
+            <label htmlFor="register-password">Contraseña</label>
+            <input
+              id="register-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
 
-        {formError && <p role="alert">{formError}</p>}
+          <div className="field">
+            <label htmlFor="register-confirm-password">Confirmar contraseña</label>
+            <input
+              id="register-confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Creando cuenta..." : "Crear cuenta"}
+          {formError && (
+            <p className="alert alert-error" role="alert">
+              {formError}
+            </p>
+          )}
+
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? "Creando cuenta..." : "Crear cuenta"}
+          </button>
+        </form>
+
+        <div className="auth-divider">
+          <span>o continuá con</span>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-outline btn-block"
+          onClick={handleGoogleSignUp}
+          disabled={submitting}
+        >
+          Continuar con Google
         </button>
-      </form>
 
-      <button type="button" onClick={handleGoogleSignUp} disabled={submitting}>
-        Continuar con Google
-      </button>
-
-      <p>
-        ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
-      </p>
-    </section>
+        <p className="auth-switch">
+          ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
+        </p>
+      </section>
+    </div>
   );
 }

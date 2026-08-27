@@ -10,11 +10,11 @@ interface TaskListProps {
 
 export function TaskList({ tasks, onToggle, onSave, onDelete }: TaskListProps) {
   if (tasks.length === 0) {
-    return <p>No tenés tareas todavía. Creá la primera arriba.</p>;
+    return <p className="empty-state">No tenés tareas todavía. Creá la primera arriba.</p>;
   }
 
   return (
-    <ul>
+    <ul className="task-list">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}

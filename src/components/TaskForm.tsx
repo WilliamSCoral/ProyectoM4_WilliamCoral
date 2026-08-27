@@ -10,6 +10,9 @@ interface TaskFormProps {
   submitLabel: string;
   onSubmit: (values: TaskFormValues) => Promise<void>;
   onCancel?: () => void;
+  // Permite que quien lo use (Tasks para crear, TaskItem para editar)
+  // aplique un estilo distinto sin duplicar el componente.
+  className?: string;
 }
 
 // Hito 6 — Un mismo componente controlado sirve tanto para crear como
@@ -20,6 +23,7 @@ export function TaskForm({
   submitLabel,
   onSubmit,
   onCancel,
+  className = "",
 }: TaskFormProps) {
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [description, setDescription] = useState(
@@ -61,39 +65,50 @@ export function TaskForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor={titleId}>Título</label>
-      <input
-        id={titleId}
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        aria-invalid={Boolean(formError)}
-        aria-describedby={formError ? `${titleId}-error` : undefined}
-        disabled={submitting}
-      />
+    <form onSubmit={handleSubmit} noValidate className={`task-form ${className}`}>
+      <div className="field">
+        <label htmlFor={titleId}>Título</label>
+        <input
+          id={titleId}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          aria-invalid={Boolean(formError)}
+          aria-describedby={formError ? `${titleId}-error` : undefined}
+          disabled={submitting}
+        />
+      </div>
 
-      <label htmlFor={descriptionId}>Descripción</label>
-      <textarea
-        id={descriptionId}
-        value={description}
-        onChange={(event) => setDescription(event.target.value)}
-        disabled={submitting}
-      />
+      <div className="field">
+        <label htmlFor={descriptionId}>Descripción</label>
+        <textarea
+          id={descriptionId}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          disabled={submitting}
+        />
+      </div>
 
       {formError && (
-        <p id={`${titleId}-error`} role="alert">
+        <p id={`${titleId}-error`} className="alert alert-error" role="alert">
           {formError}
         </p>
       )}
 
-      <button type="submit" disabled={submitting}>
-        {submitting ? "Guardando..." : submitLabel}
-      </button>
-      {onCancel && (
-        <button type="button" onClick={onCancel} disabled={submitting}>
-          Cancelar
+      <div className="task-form__actions">
+        <button type="submit" className="btn btn-primary" disabled={submitting}>
+          {submitting ? "Guardando..." : submitLabel}
         </button>
-      )}
+        {onCancel && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   );
 }

@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor Estratégico de Tareas</title>
+    <script>
+      // Aplica el tema guardado ANTES de que React monte, para evitar un
+      // parpadeo con el tema equivocado (FOUC) al recargar la página.
+      (function () {
+        var stored = localStorage.getItem("gestor-tareas-theme");
+        if (stored === "light" || stored === "dark") {
+          document.documentElement.dataset.theme = stored;
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -45,20 +45,32 @@ export function Tasks() {
   }
 
   return (
-    <section>
-      <header>
-        <h1>Gestor Estratégico de Tareas</h1>
-        <p>Sesión iniciada como {user?.email}.</p>
-        <button type="button" onClick={() => logout()}>
-          Cerrar sesión
-        </button>
+    <div className="tasks-page">
+      <header className="tasks-header">
+        <div>
+          <h1>Gestor Estratégico de Tareas</h1>
+          <p className="tasks-header__user">Sesión iniciada como {user?.email}.</p>
+        </div>
+        <div className="tasks-header__actions">
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => logout()}>
+            Cerrar sesión
+          </button>
+        </div>
       </header>
 
       <TaskForm submitLabel="Agregar tarea" onSubmit={handleCreate} />
 
-      {actionError && <p role="alert">{actionError}</p>}
-      {loading && <p>Cargando tareas...</p>}
-      {error && <p role="alert">{error}</p>}
+      {actionError && (
+        <p className="alert alert-error" role="alert">
+          {actionError}
+        </p>
+      )}
+      {loading && <p className="state-message">Cargando tareas...</p>}
+      {error && (
+        <p className="alert alert-error" role="alert">
+          {error}
+        </p>
+      )}
       {!loading && !error && (
         <TaskList
           tasks={tasks}
@@ -67,6 +79,6 @@ export function Tasks() {
           onDelete={handleDelete}
         />
       )}
-    </section>
+    </div>
   );
 }

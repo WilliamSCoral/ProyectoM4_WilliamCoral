@@ -61,44 +61,67 @@ export function Login() {
   }
 
   return (
-    <section>
-      <h1>Iniciar sesión</h1>
-      {state?.from && (
-        <p role="alert">Necesitás iniciar sesión para acceder a esa página.</p>
-      )}
-      <form onSubmit={handleSubmit} noValidate>
-        <label htmlFor="login-email">Email</label>
-        <input
-          id="login-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          autoComplete="email"
-        />
+    <div className="auth-page">
+      <section className="auth-card">
+        <h1>Bienvenido de nuevo</h1>
 
-        <label htmlFor="login-password">Contraseña</label>
-        <input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="current-password"
-        />
+        {state?.from && (
+          <p className="alert alert-info" role="alert">
+            Necesitás iniciar sesión para acceder a esa página.
+          </p>
+        )}
 
-        {formError && <p role="alert">{formError}</p>}
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="field">
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+            />
+          </div>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Ingresando..." : "Ingresar"}
+          <div className="field">
+            <label htmlFor="login-password">Contraseña</label>
+            <input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+            />
+          </div>
+
+          {formError && (
+            <p className="alert alert-error" role="alert">
+              {formError}
+            </p>
+          )}
+
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? "Ingresando..." : "Ingresar"}
+          </button>
+        </form>
+
+        <div className="auth-divider">
+          <span>o continuá con</span>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-outline btn-block"
+          onClick={handleGoogleLogin}
+          disabled={submitting}
+        >
+          Continuar con Google
         </button>
-      </form>
 
-      <button type="button" onClick={handleGoogleLogin} disabled={submitting}>
-        Continuar con Google
-      </button>
-
-      <p>
-        ¿No tenés cuenta? <Link to="/register">Registrate</Link>
-      </p>
-    </section>
+        <p className="auth-switch">
+          ¿No tenés cuenta? <Link to="/register">Registrate</Link>
+        </p>
+      </section>
+    </div>
   );
 }

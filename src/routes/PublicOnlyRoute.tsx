@@ -10,7 +10,7 @@ export function PublicOnlyRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <p>Cargando sesión...</p>;
+    return <p className="state-message">Cargando sesión...</p>;
   }
 
   if (user) {

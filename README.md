@@ -128,6 +128,27 @@ crearlo de nuevo la primera vez.
 
 _(Esta sección se ampliará con las decisiones tomadas en cada hito.)_
 
+**Diseño e interfaz:** todos los colores viven en variables CSS
+(`src/index.css`) definidas una sola vez en `:root` y redefinidas dentro
+de `@media (prefers-color-scheme: dark)` — el modo oscuro/claro lo decide
+el sistema operativo del usuario, sin necesidad de un toggle manual ni
+de duplicar reglas de estilo. El layout sigue un enfoque mobile-first
+real: cada bloque define primero cómo se ve en una pantalla chica (una
+columna, botones de al menos 44px de alto para que sean fáciles de tocar)
+y las `@media (min-width: ...)` van agregando o reordenando desde ahí
+hacia arriba — nunca al revés. Los cortes son `768px` (tablet: el header
+de Tareas pasa a fila, los contenedores se ensanchan) y `1024px`
+(desktop: contenedores más anchos todavía). `TaskForm` es el mismo
+componente para crear y editar, así que su estilo también se comparte
+(con una variante `.task-form--edit` más discreta para el modo inline).
+Además del modo automático, hay un interruptor manual
+([ThemeToggle.tsx](src/components/ThemeToggle.tsx) +
+[useTheme.ts](src/hooks/useTheme.ts)) que escribe `data-theme` en
+`<html>` y gana por encima de la preferencia del sistema; la elección se
+guarda en `localStorage` y un pequeño script inline en `index.html` la
+aplica antes de que React monte, para que no haya parpadeo del tema
+equivocado al recargar.
+
 ## Instrucciones de instalación
 
 ```bash

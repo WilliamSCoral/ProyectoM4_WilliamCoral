@@ -27,8 +27,9 @@ export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
 
   if (isEditing) {
     return (
-      <li>
+      <li className="task-item">
         <TaskForm
+          className="task-form--edit"
           initialValues={{ title: task.title, description: task.description }}
           submitLabel="Guardar cambios"
           onCancel={() => setIsEditing(false)}
@@ -42,23 +43,37 @@ export function TaskItem({ task, onToggle, onSave, onDelete }: TaskItemProps) {
   }
 
   return (
-    <li>
-      <input
-        type="checkbox"
-        checked={task.completed}
-        onChange={onToggle}
-        aria-label={`Marcar "${task.title}" como ${task.completed ? "pendiente" : "completada"}`}
-      />
-      <span style={task.completed ? { textDecoration: "line-through" } : undefined}>
-        {task.title}
-      </span>
-      {task.description && <p>{task.description}</p>}
-      <button type="button" onClick={() => setIsEditing(true)}>
-        Editar
-      </button>
-      <button type="button" onClick={handleDelete} disabled={deleting}>
-        {deleting ? "Eliminando..." : "Eliminar"}
-      </button>
+    <li className={`task-item ${task.completed ? "task-item--completed" : ""}`}>
+      <div className="task-item__row">
+        <input
+          type="checkbox"
+          className="task-item__checkbox"
+          checked={task.completed}
+          onChange={onToggle}
+          aria-label={`Marcar "${task.title}" como ${task.completed ? "pendiente" : "completada"}`}
+        />
+        <span
+          className={`task-item__title ${task.completed ? "task-item__title--completed" : ""}`}
+        >
+          {task.title}
+        </span>
+      </div>
+      {task.description && (
+        <p className="task-item__description">{task.description}</p>
+      )}
+      <div className="task-item__actions">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
+          Editar
+        </button>
+        <button
+          type="button"
+          className="btn btn-danger btn-sm"
+          onClick={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? "Eliminando..." : "Eliminar"}
+        </button>
+      </div>
     </li>
   );
 }
